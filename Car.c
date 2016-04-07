@@ -1,11 +1,11 @@
 // Pin declarations
 
-const int sonarPin1 = 2;
-const int sonarPin2 = 3;
-const int motorLeft1 = 4;
-const int motorLeft2 = 5;
-const int motorRight1 = 6;
-const int motorRight2 = 7;
+const int sonarPin1 = 8;
+const int sonarPin2 = 9;
+const int motorLeft1 = 2;
+const int motorLeft2 = 4;
+const int motorRight1 = 3;
+const int motorRight2 = 5;
 
 // Constant declarations
 
@@ -24,6 +24,7 @@ int i = 0;
 int x = 0;
 String moveInstruct[];
 bool isBluetoothOn = false;
+bool commandRunning = false;
 
 // Function declarations
 
@@ -87,23 +88,25 @@ void moveCar(String direction, int duration) {
 
     delay(duration);
 
-  } else if (direction == "left") {
-
+  } else if (direction == "rotate left"){
+    // Rotate left
     digitalWrite(motorLeft1, HIGH);
-    digitalWrite(motorLeft2, LOW);
-    digitalWrite(motorRight1, LOW);
-    digitalWrite(motorRight2, HIGH);
-
-    delay(duration);
-
-  } else if (direction == "right") {
-
-    digitalWrite(motorLeft1, LOW);
     digitalWrite(motorLeft2, HIGH);
     digitalWrite(motorRight1, HIGH);
     digitalWrite(motorRight2, LOW);
-
+    
     delay(duration);
+    
+  }
+  else if (direction == "rotate right"){
+    // Rotate right
+    digitalWrite(motorLeft1, HIGH);
+    digitalWrite(motorLeft2, LOW);
+    digitalWrite(motorRight1, HIGH);
+    digitalWrite(motorRight2, HIGH);
+    
+    delay(duration);
+    
   }
 
 }
@@ -137,9 +140,15 @@ void thinkCar(int sonar, int index) {
 // Core Arduino Functions
 
 void setup() {
-
+  
   // Need to initialise certain values and variables here
-
+  pinMode(motorLeft1, OUTPUT);
+  pinMode(motorLeft2, OUTPUT);
+  pinMode(motorRight1, OUTPUT);
+  pinMode(motorRight2, OUTPUT);
+  
+  // Setup for Bluetooth Component
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -159,31 +168,58 @@ void loop() {
         breakCar(); 
       }
       if (input == "56"){
-        // Call move up 
-        moveCar("up", carForwards);
-        breakCar();
+        // Call move up
+        if (!commandRunning){
+          commandRunning = true; 
+          moveCar("up", carForwards);
+          breakCar();
+          commandRunning = false;
+        }
+        else{
+          return;
+        }
       }
       if (input == "50"){
         // Call move down function
-        moveCar("down", carForwards);
-        breakCar();
+        if (!commandRunning){
+          commandRunning = true;
+          moveCar("down", carForwards);
+          breakCar();
+          commandRunning = false;
+        }
+        else{
+          return;
+        }
       }
       if (input == "69"){
         // Call rotate left function
-        moveCar("rotate left", carTurn);
-        breakCar();
+        if (!commandRunning){
+          commandRunning = true;
+          moveCar("rotate left", carTurn);
+          breakCar();
+          commandRunning = false;
+        }
+        else{
+          return;
+        }
       }
       if (input == "70"){
         // Call rotate right function
-        moveCar("rotate right", carTurn);
-        breakCar();
+        if (!commandRunning){
+          commandRunning = true;
+          moveCar("rotate right", carTurn);
+          breakCar();
+          commandRunning = false;
+        }
+        else{
+          return;
+        }
       }
       else{
         // Do nothing
         breakCar();
-        return;
       }
-      return;
+    return;
     }
     
   }
@@ -200,30 +236,59 @@ void loop() {
       breakCar(); 
     }
     if (input == "56"){
-      // Call move up 
-      moveCar("up", 1000);
-      breakCar();
-    }
-    if (input == "50"){
-      // Call move down function
-      moveCar("down", 1000);
-      breakCar();
-    }
-    if (input == "69"){
-      // Call rotate left function
-      moveCar("rotate left", 1000);
-      breakCar();
-    }
-    if (input == "70"){
-      // Call rotate right function
-      moveCar("rotate right", 1000);
-      breakCar();
-    }
+        // Call move up
+        if (!commandRunning){
+          commandRunning = true; 
+          moveCar("up", carForwards);
+          breakCar();
+          commandRunning = false;
+        }
+        else{
+          return;
+        }
+      }
+      if (input == "50"){
+        // Call move down function
+        if (!commandRunning){
+          commandRunning = true;
+          moveCar("down", carForwards);
+          breakCar();
+          commandRunning = false;
+        }
+        else{
+          return;
+        }
+      }
+      if (input == "69"){
+        // Call rotate left function
+        if (!commandRunning){
+          commandRunning = true;
+          moveCar("rotate left", carTurn);
+          breakCar();
+          commandRunning = false;
+        }
+        else{
+          return;
+        }
+      }
+      if (input == "70"){
+        // Call rotate right function
+        if (!commandRunning){
+          commandRunning = true;
+          moveCar("rotate right", carTurn);
+          breakCar();
+          commandRunning = false;
+        }
+        else{
+          return;
+        }
+      }
     else{
       // Do nothing
       breakCar();
-      return;
-    }}
+    }
+  }
+  return;
   }
   else{
     testSonar = sonarCar();
