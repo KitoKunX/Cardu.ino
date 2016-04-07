@@ -2,7 +2,6 @@
 
 const int sonarPin1 = 2;
 const int sonarPin2 = 3;
-
 const int motorLeft1 = 4;
 const int motorLeft2 = 5;
 const int motorRight1 = 6;
@@ -10,9 +9,10 @@ const int motorRight2 = 7;
 
 // Constant declarations
 
-const int carMovement = 100;
+const int carMove = 100;
 const int carForwards = 1000;
 const int carTurn = 1500;
+const int checkBluetoothTime = millis() + 10000;
 
 // Variable declarations
 
@@ -22,7 +22,8 @@ int testSonar = 0;
 int currSonar = 0;
 int i = 0;
 int x = 0;
-string moveInstruct[];
+String moveInstruct[];
+bool isBluetoothOn = false;
 
 // Function declarations
 
@@ -48,7 +49,7 @@ int sonarCar() {
 
 
 // This function check if the sonar readings are accurate
-bool dataCheck(checking, index) {
+bool dataCheck(int checking, int index) {
 
   if (prevSonar + carMove < checking || prevSonar - carMove > checking) {
 
@@ -62,9 +63,11 @@ bool dataCheck(checking, index) {
 
 }
 
+void moveCar(String direction, int duration = 1000);
+
 
 // This function tells the motors to move in a particualr direction for a specified time
-void moveCar(direction) {
+void moveCar(String direction, int duration) {
 
   if (direction == "up") {
 
@@ -73,9 +76,7 @@ void moveCar(direction) {
     digitalWrite(motorRight1, HIGH);
     digitalWrite(motorRight2, LOW);
 
-    delay(carForwards);
-
-    breakCar();
+    delay(duration);
 
   } else if (direction == "down") {
 
@@ -84,9 +85,7 @@ void moveCar(direction) {
     digitalWrite(motorRight1, LOW);
     digitalWrite(motorRight2, HIGH);
 
-    delay(carForwards);
-
-    breakCar();
+    delay(duration);
 
   } else if (direction == "left") {
 
@@ -95,9 +94,7 @@ void moveCar(direction) {
     digitalWrite(motorRight1, LOW);
     digitalWrite(motorRight2, HIGH);
 
-    delay(carTurn);
-
-    breakCar();
+    delay(duration);
 
   } else if (direction == "right") {
 
@@ -106,10 +103,7 @@ void moveCar(direction) {
     digitalWrite(motorRight1, HIGH);
     digitalWrite(motorRight2, LOW);
 
-    delay(carTurn);
-
-    breakCar();
-
+    delay(duration);
   }
 
 }
@@ -127,11 +121,12 @@ void breakCar() {
 
 
 // This function uses the sonar readings to decide what to do next
-void thinkCar(sonar, index) {
+void thinkCar(int sonar, int index) {
 
   //  thinkCarResult -> temporary value to represent the output of this function
 
-  motorInstructions[index] = thinkCarResult;
+  String thinkCarResult = moveInstruct[index];
+  
 
   moveCar(thinkCarResult);
 
@@ -148,20 +143,104 @@ void setup() {
 }
 
 void loop() {
-
-  testSonar = sonarCar();
-
-  if (dataCheck(testSonar, x) === true) {
-
-    prevSonar == currSonar;
-    currSonar == testSonar;
-
-    x++;
-
-    // This is where thinkCar function is called and chooses what to do based off the currSonar variable
-
-    thinkCar(currSonar, x);
-
+  
+  // Check in start if bluetooth is connected 
+  while (millis() < checkBluetoothTime){
+    
+    if ((Serial.available()) && (isBluetoothOn == false)){
+      isBluetoothOn = true;
+      String input = String(Serial.read());
+      Serial.print("Character entered: ");
+      Serial.println(input);
+    
+      // Conditions upon input
+      if (input == "48"){
+        // Call stop function
+        breakCar(); 
+      }
+      if (input == "56"){
+        // Call move up 
+        moveCar("up", carForwards);
+        breakCar();
+      }
+      if (input == "50"){
+        // Call move down function
+        moveCar("down", carForwards);
+        breakCar();
+      }
+      if (input == "69"){
+        // Call rotate left function
+        moveCar("rotate left", carTurn);
+        breakCar();
+      }
+      if (input == "70"){
+        // Call rotate right function
+        moveCar("rotate right", carTurn);
+        breakCar();
+      }
+      else{
+        // Do nothing
+        breakCar();
+        return;
+      }
+      return;
+    }
+    
+  }
+  
+  if (isBluetoothOn){
+    if (Serial.available()) {
+    String input = String(Serial.read());
+    Serial.print("Character entered: ");
+    Serial.println(input);
+  
+    // Conditions upon input
+    if (input == "48"){
+      // Call stop function
+      breakCar(); 
+    }
+    if (input == "56"){
+      // Call move up 
+      moveCar("up", 1000);
+      breakCar();
+    }
+    if (input == "50"){
+      // Call move down function
+      moveCar("down", 1000);
+      breakCar();
+    }
+    if (input == "69"){
+      // Call rotate left function
+      moveCar("rotate left", 1000);
+      breakCar();
+    }
+    if (input == "70"){
+      // Call rotate right function
+      moveCar("rotate right", 1000);
+      breakCar();
+    }
+    else{
+      // Do nothing
+      breakCar();
+      return;
+    }}
+  }
+  else{
+    testSonar = sonarCar();
+  
+    if (dataCheck(testSonar, x) == true) {
+  
+      prevSonar = currSonar;
+      currSonar = testSonar;
+  
+      x++;
+  
+      // This is where thinkCar function is called and chooses what to do based off the currSonar variable
+  
+      thinkCar(currSonar, x);
+    }
+  
+    }
   }
 
-}
+
