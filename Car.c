@@ -25,6 +25,7 @@ int x = 0;
 String moveInstruct[];
 bool isBluetoothOn = false;
 bool commandRunning = false;
+int queueTime = millis();
 
 // Function declarations
 
@@ -67,7 +68,7 @@ bool dataCheck(int checking, int index) {
 void moveCar(String direction, int duration = 1000);
 
 
-// This function tells the motors to move in a particualr direction for a specified time
+// This function tells the motors to move in a particular direction for a specified time
 void moveCar(String direction, int duration) {
 
   if (direction == "up") {
@@ -147,6 +148,7 @@ void procInput(String input){
         if (!commandRunning){
           commandRunning = true; 
           moveCar("up", carForwards);
+		  queueTime = millis() + carForwards;
           breakCar();
           commandRunning = false;
         }
@@ -159,6 +161,7 @@ void procInput(String input){
         if (!commandRunning){
           commandRunning = true;
           moveCar("down", carForwards);
+		  queueTime = millis() + carForwards;
           breakCar();
           commandRunning = false;
         }
@@ -171,6 +174,7 @@ void procInput(String input){
         if (!commandRunning){
           commandRunning = true;
           moveCar("rotate left", carTurn);
+		  queueTime = millis() + carTurn;
           breakCar();
           commandRunning = false;
         }
@@ -183,6 +187,7 @@ void procInput(String input){
         if (!commandRunning){
           commandRunning = true;
           moveCar("rotate right", carTurn);
+		  queueTime = millis() + carTurn;
           breakCar();
           commandRunning = false;
         }
@@ -253,7 +258,7 @@ void loop() {
 		String input = String(Serial.read());
 		Serial.print("Character entered: ");
 		Serial.println(input);
-  
+    
     procInput(input);
   }
   }
