@@ -135,34 +135,9 @@ void thinkCar(int sonar, int index) {
 
 }
 
-
-
-// Core Arduino Functions
-
-void setup() {
-  
-  // Need to initialise certain values and variables here
-  pinMode(motorLeft1, OUTPUT);
-  pinMode(motorLeft2, OUTPUT);
-  pinMode(motorRight1, OUTPUT);
-  pinMode(motorRight2, OUTPUT);
-  
-  // Setup for Bluetooth Component
-  Serial.begin(9600);
-}
-
-void loop() {
-  
-  // Check in start if bluetooth is connected 
-  while (millis() < checkBluetoothTime){
-    
-    if ((Serial.available()) && (isBluetoothOn == false)){
-      isBluetoothOn = true;
-      String input = String(Serial.read());
-      Serial.print("Character entered: ");
-      Serial.println(input);
-    
-      // Conditions upon input
+// Function to process bluetooth input (Less messy)
+void procInput(String input){
+// Conditions upon input
       if (input == "48"){
         // Call stop function
         breakCar(); 
@@ -219,79 +194,28 @@ void loop() {
         // Do nothing
         breakCar();
       }
-    return;
-    }
-    
-  }
+    return;	
+}
+
+
+
+// Core Arduino Functions
+
+void setup() {
   
-  if (isBluetoothOn){
-    if (Serial.available()) {
-    String input = String(Serial.read());
-    Serial.print("Character entered: ");
-    Serial.println(input);
+  // Need to initialise certain values and variables here
+  pinMode(motorLeft1, OUTPUT);
+  pinMode(motorLeft2, OUTPUT);
+  pinMode(motorRight1, OUTPUT);
+  pinMode(motorRight2, OUTPUT);
   
-    // Conditions upon input
-    if (input == "48"){
-      // Call stop function
-      breakCar(); 
-    }
-    if (input == "56"){
-        // Call move up
-        if (!commandRunning){
-          commandRunning = true; 
-          moveCar("up", carForwards);
-          breakCar();
-          commandRunning = false;
-        }
-        else{
-          return;
-        }
-      }
-      if (input == "50"){
-        // Call move down function
-        if (!commandRunning){
-          commandRunning = true;
-          moveCar("down", carForwards);
-          breakCar();
-          commandRunning = false;
-        }
-        else{
-          return;
-        }
-      }
-      if (input == "69"){
-        // Call rotate left function
-        if (!commandRunning){
-          commandRunning = true;
-          moveCar("rotate left", carTurn);
-          breakCar();
-          commandRunning = false;
-        }
-        else{
-          return;
-        }
-      }
-      if (input == "70"){
-        // Call rotate right function
-        if (!commandRunning){
-          commandRunning = true;
-          moveCar("rotate right", carTurn);
-          breakCar();
-          commandRunning = false;
-        }
-        else{
-          return;
-        }
-      }
-    else{
-      // Do nothing
-      breakCar();
-    }
-  }
-  return;
-  }
-  else{
-    testSonar = sonarCar();
+  // Setup for Bluetooth Component
+  Serial.begin(9600);
+}
+
+//Make code easier to access
+void mainSonar(){
+	testSonar = sonarCar();
   
     if (dataCheck(testSonar, x) == true) {
   
@@ -304,6 +228,39 @@ void loop() {
   
       thinkCar(currSonar, x);
     }
+	}
+
+void loop() {
+  
+  // Check in start if bluetooth is connected 
+  while (millis() < checkBluetoothTime){
+    
+    if ((Serial.available()) && (isBluetoothOn == false)){
+      isBluetoothOn = true;
+      String input = String(Serial.read());
+      Serial.print("Character entered: ");
+      Serial.println(input);
+    
+      procInput(input);
+	  return; // Don't go any further and restart main loop
+    }
+	
+    
+  }
+  
+  if (isBluetoothOn){
+    if (Serial.available()) {
+		String input = String(Serial.read());
+		Serial.print("Character entered: ");
+		Serial.println(input);
+  
+    procInput(input);
+  }
+  }
+  else{
+    
+	//call mainSonar function
+	mainSonar();
   
     }
   }
